@@ -1,21 +1,19 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 
-import { VPCStack } from "./vpc-stack";
-import { ECSServiceStack } from "./ecs-service-stack";
+import { VpcConstruct } from "./vpc";
+import { ECSServiceConstruct } from "./ecs-service";
 
 export class EcsDemoStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     // VPC Stack
-    const vpcStack = new VPCStack(this, 'VPCStack', {
-        vpcName: 'ecs-demo-vpc',
-      });
+    const vpcConstruct = new VpcConstruct(this, 'MyVPCConstruct');
 
-    // ECS Service Stack
-    new ECSServiceStack(this, "MyECSServiceStack", {
-      vpc: vpcStack.vpc,
+    // ECS Service Construct
+    const ecsServiceConstruct = new ECSServiceConstruct(this, 'MyECSServiceConstruct', {
+      vpc: vpcConstruct.vpc,
     });
   }
 }
