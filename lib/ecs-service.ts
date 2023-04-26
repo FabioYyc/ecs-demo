@@ -17,22 +17,35 @@ export class ECSServiceConstruct extends Construct {
       vpc: props.vpc,
     });
 
-    // Task Definition with yeasy/simple-web image
+    // Task Definition with yeasy/simple-web image and an additional nginx container
     const taskDefinition = new ecs.FargateTaskDefinition(this, 'SimpleWebTaskDefinition', {
       memoryLimitMiB: 512,
       cpu: 256,
     });
 
-    const container = taskDefinition.addContainer('simple-web', {
+    const simpleWebContainer = taskDefinition.addContainer('simple-web', {
       image: ecs.ContainerImage.fromRegistry('yeasy/simple-web'),
       logging: new ecs.AwsLogDriver({
         streamPrefix: 'SimpleWebContainer',
       }),
     });
 
-    // Expose port 80 on the container
-    container.addPortMappings({
+    // Expose port 80 on the simple-web container
+    simpleWebContainer.addPortMappings({
       containerPort: 80,
+    });
+
+    const nginxContainer = taskDefinition.addContainer('nginx', {
+      image: ecs.ContainerImage.fromRegistry('nginx'),
+      logging: new ecs.AwsLogDriver({
+        streamPrefix: 'NginxContainer',
+      }),
+    });
+
+    // Expose port 8080 on the nginx container
+    nginxContainer.addPortMappings({
+      containerPort: 8080,
+      hostPort: 8080,
     });
 
     // Create a Fargate service using the task definition
